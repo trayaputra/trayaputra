@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Tangkap Bintang - trayaputra</title>
+<style>
+  body { margin:0; font-family:'Segoe UI',sans-serif; background:#0b0c2a; color:#fff; text-align:center; }
+  canvas { background:#11133a; display:block; margin:20px auto; border:2px solid #4f5bff; border-radius:8px; }
+  h1 { margin-top:20px; }
+  p { color:#aab; }
+</style>
+</head>
+<body>
+<h1>🌟 Tangkap Bintang 🌟</h1>
+<p>Gunakan tombol ← → atau sentuh layar untuk bergerak. Tangkap bintang sebanyak mungkin!</p>
+<canvas id="game" width="400" height="500"></canvas>
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+let player = { x: 175, y: 460, w: 50, h: 20 };
+let star = { x: Math.random()*360, y: 0, r: 10, speed: 2 };
+let score = 0;
+let gameOver = false;
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'ArrowLeft' && player.x > 0) player.x -= 20;
+  if(e.key === 'ArrowRight' && player.x < 350) player.x += 20;
+});
+canvas.addEventListener('touchmove', e => {
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches[0].clientX - rect.left;
+  player.x = Math.max(0, Math.min(350, touch - 25));
+});
+
+function draw() {
+  ctx.clearRect(0,0,400,500);
+  ctx.fillStyle = '#4f5bff';
+  ctx.fillRect(player.x, player.y, player.w, player.h);
+  ctx.fillStyle = '#ffd700';
+  ctx.beginPath();
+  ctx.arc(star.x, star.y, star.r, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.font = '16px sans-serif';
+  ctx.fillText('Skor: ' + score, 10, 20);
+}
+
+function loop() {
+  if(gameOver) {
+    ctx.fillStyle = '#fff';
+    ctx.font = '24px sans-serif';
+    ctx.fillText('Game Over! Skor: ' + score, 80, 250);
+    return;
+  }
+  star.y += star.speed;
+  if(star.y > 500) {
+    star.y = 0;
+    star.x = Math.random()*360;
+    star.speed += 0.2;
+  }
+  if(star.y + star.r >= player.y && star.x > player.x && star.x < player.x + player.w) {
+    score++;
+    star.y = 0;
+    star.x = Math.random()*360;
+  }
+  if(star.y + star.r >= player.y + player.h && (star.x < player.x || star.x > player.x + player.w)) {
+    gameOver = true;
+  }
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
